@@ -1,0 +1,19 @@
+Source: gstreamer1.0-delta
+Section: libs
+Priority: extra
+Maintainer: RyanG <decatf@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), cdbs, autotools-dev, libgstreamer1.0-dev (>=1.0.0), libgstreamer-plugins-base1.0-dev (>=1.0.0)
+Standards-Version: 3.9.4
+Homepage: 
+#Vcs-Git: git://git.debian.org/collab-maint/gst-delta.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/gst-delta.git;a=summary
+
+Package: gstreamer1.0-delta
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GStreamer delta audio filter.
+ Delta audio filter. Noise sharpening DSP.
+ Audio filter for GStreamer takes the difference
+ between each successive sample. The difference is added to the
+ sample to achieve a sharpening effect. 
+ This may improve the percieved sound quality.

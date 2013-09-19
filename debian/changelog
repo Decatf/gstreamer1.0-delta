@@ -1,0 +1,5 @@
+gstreamer1.0-delta (1.0.0-1ppa1~raring1) raring; urgency=low
+
+  * Update build configuration.
+
+ -- RyanG <decatf@gmail.com>  Sun, 15 Sep 2013 20:48:51 -0400
