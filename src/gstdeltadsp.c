@@ -127,7 +127,7 @@ static void
     ", layout = (string) { interleaved }"
 #endif
 
-const gchar* allowed_cap_widths[5] = { 8, 16, 32, 64 };
+const gchar allowed_cap_widths[5] = { 8, 16, 32, 64 };
 
 /* GObject vmethod implementations */
 
@@ -182,9 +182,7 @@ gst_delta_dsp_init (GstDeltaDsp * filter)
 {
   GST_DEBUG ("init");
 
-	GstBaseTransform* base_transform = (GstBaseTransform*) filter;
-
-  /* do stuff if you need to */
+  /* initialize default filter settings */
 	filter->gain = 1.00f;
 	filter->silent = TRUE;
 }
@@ -236,10 +234,8 @@ gst_delta_dsp_setup (GstAudioFilter * filter,
     const GstAudioInfo * info)
 {
   GstDeltaDsp *delta_dsp;
-	GstBaseTransform *base_transform;
 
   delta_dsp = GST_DELTA_DSP (filter);
-	base_transform = (GstBaseTransform*) filter;
 
   /* if any setup needs to be done, do it here */
 	gboolean res = setup_delta_dsp_caps(filter);
@@ -273,13 +269,12 @@ setup_delta_dsp_caps(GstAudioFilter * filter)
 
 	if (caps != NULL)
 	{
-		gchar* tostr = gst_caps_to_string(caps);
+		//gchar* tostr = gst_caps_to_string(caps);
 		//g_print("%s\n", tostr);
 
     GstStructure *structure = gst_caps_get_structure (caps, 0);
     //gchar *mime = gst_structure_get_name (structure);
 
-    gint temp = 0;
     const gchar* format = gst_structure_get_string (structure, "format");  
 
 		delta_dsp->sign = TRUE;
@@ -297,7 +292,6 @@ setup_delta_dsp_caps(GstAudioFilter * filter)
 		else
 			return FALSE;			
 
-		gchar* byte_order = NULL;
 		const gchar* be = "BE";
 		const gchar* le = "LE";
 		if (g_strrstr(format, le) != NULL)
@@ -331,13 +325,9 @@ gst_delta_dsp_filter (GstBaseTransform * base_transform,
     GstBuffer * inbuf, GstBuffer * outbuf)
 {
   GstDeltaDsp *delta_dsp;
-  GstAudioFilter *audiofilter;
-
-  //audiofilter = GST_AUDIO_FILTER (base_transform);
   delta_dsp = GST_DELTA_DSP (base_transform);
 
-  /* FIXME: do something interesting here.  This simply copies the source
-   * to the destination. */
+  /* Apply the filter function */
 /*
 	if (delta_dsp->silent == FALSE)
 		g_print("gst_delta_dsp_filter\n");
@@ -371,13 +361,9 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
     GstBuffer * buf)
 {
   GstDeltaDsp *delta_dsp;
-  GstAudioFilter *audiofilter;
-
-  //audiofilter = GST_AUDIO_FILTER_CAST (base_transform);
   delta_dsp = GST_DELTA_DSP (base_transform);
 
-  /* FIXME: do something interesting here.  This simply copies the source
-   * to the destination. */
+  /* Apply the filter function */
 /*	
 	g_print("inplace\n");
 	g_print("%d\n", delta_dsp->channels);
