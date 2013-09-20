@@ -71,14 +71,6 @@
 GST_DEBUG_CATEGORY_STATIC (gst_delta_dsp_debug);
 #define GST_CAT_DEFAULT gst_delta_dsp_debug
 
-
-
-enum
-{
-  /* FILL ME */
-  LAST_SIGNAL
-};
-
 enum
 {
   ARG_0,
@@ -86,30 +78,24 @@ enum
   PROP_SILENT
 };
 
-/* debug category for fltering log messages
- *
- * FIXME:exchange the string 'Template plugin' with your description
- */
+/* debug category for fltering log messages */
 #define DEBUG_INIT(bla) \
   GST_DEBUG_CATEGORY_INIT (gst_delta_dsp_debug, "delta_dsp", 0, "Delta Dsp");
 
 #define gst_delta_dsp_parent_class parent_class
-//G_DEFINE_TYPE (GstDeltaDsp, gst_delta_dsp, GST_TYPE_ELEMENT);
+
 G_DEFINE_TYPE (GstDeltaDsp, gst_delta_dsp, GST_TYPE_AUDIO_FILTER);
 
 static void gst_delta_dsp_set_property (GObject * object,
     guint prop_id, const GValue * value, GParamSpec * pspec);
 static void gst_delta_dsp_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
-
 static gboolean gst_delta_dsp_setup (GstAudioFilter * filter, 
 		const GstAudioInfo * info);
 static GstFlowReturn gst_delta_dsp_filter (GstBaseTransform * bt,
     GstBuffer * outbuf, GstBuffer * inbuf);
-static GstFlowReturn
-gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
+static GstFlowReturn gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
     GstBuffer * buf);
-
 static gboolean
 		setup_delta_dsp_caps(GstAudioFilter * filter);
 static void 
@@ -273,7 +259,6 @@ setup_delta_dsp_caps(GstAudioFilter * filter)
 		//g_print("%s\n", tostr);
 
     GstStructure *structure = gst_caps_get_structure (caps, 0);
-    //gchar *mime = gst_structure_get_name (structure);
 
     const gchar* format = gst_structure_get_string (structure, "format");  
 
@@ -327,26 +312,24 @@ gst_delta_dsp_filter (GstBaseTransform * base_transform,
   GstDeltaDsp *delta_dsp;
   delta_dsp = GST_DELTA_DSP (base_transform);
 
-  /* Apply the filter function */
-/*
-	if (delta_dsp->silent == FALSE)
-		g_print("gst_delta_dsp_filter\n");
-*/
+  /* copy the source buffer to destination buffer */
 	GstMapInfo src_map_info, dest_map_info;
 	gboolean res;
 	res = gst_buffer_map(inbuf, &src_map_info, GST_MAP_READ);
 	if (res == FALSE) {
-		g_print("inbuf map failed.\n");
+		GST_ERROR("inbuf map failed.\n");
 		return GST_FLOW_ERROR;
 	}
 	res = gst_buffer_map(outbuf, &dest_map_info, GST_MAP_WRITE);
 	if (res == FALSE) {
-		g_print("outbuf map failed.\n");
+		GST_ERROR("outbuf map failed.\n");
 		return GST_FLOW_ERROR;
 	}
 
 	memcpy (dest_map_info.data, src_map_info.data,
 		src_map_info.size);
+
+  /* Apply the filter function */
 	if (delta_dsp->process != NULL)
 		delta_dsp->process (dest_map_info.data, dest_map_info.size, delta_dsp->channels, delta_dsp->gain);
 
@@ -364,16 +347,10 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
   delta_dsp = GST_DELTA_DSP (base_transform);
 
   /* Apply the filter function */
-/*	
-	g_print("inplace\n");
-	g_print("%d\n", delta_dsp->channels);
-	g_print("%f\n", delta_dsp->gain);
-	g_print("%d\n", gst_buffer_is_writable(buf));
-*/
 	GstMapInfo map_info;
 	gboolean res = gst_buffer_map(buf, &map_info,  GST_MAP_READ | GST_MAP_WRITE);
 	if (res == FALSE) {
-		g_print("buffer map failed.\n");
+		GST_ERROR ("buffer map failed.\n");
 		return GST_FLOW_ERROR;
 	}
 
@@ -381,7 +358,6 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
 		delta_dsp->process (map_info.data, map_info.size, delta_dsp->channels, delta_dsp->gain);
 
 	gst_buffer_unmap(buf, &map_info);
-
 
   return GST_FLOW_OK;
 }
@@ -443,10 +419,7 @@ plugin_init (GstPlugin * delta)
       GST_TYPE_DELTA_DSP);
 }
 
-/* gstreamer looks for this structure to register plugins
- *
- * FIXME:exchange the string 'Template plugin' with you plugin description
- */
+/* gstreamer looks for this structure to register plugins */
 GST_PLUGIN_DEFINE (
     GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
