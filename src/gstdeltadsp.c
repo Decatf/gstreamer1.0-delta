@@ -97,7 +97,7 @@ static GstFlowReturn gst_delta_dsp_filter (GstBaseTransform * bt,
 static GstFlowReturn gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
     GstBuffer * buf);
 static gboolean
-		setup_delta_dsp_caps(GstAudioFilter * filter);
+		setup_delta_dsp_caps(GstAudioInfo * info, GstDeltaDsp* delta_dsp);
 static void 
 		set_delta_filter_function (GstDeltaDsp *filter);
 static void 
@@ -112,8 +112,6 @@ static void
     GST_AUDIO_CAPS_MAKE ("{ F32BE, F64BE, S8, S16BE, S32BE }") \
     ", layout = (string) { interleaved }"
 #endif
-
-const gchar allowed_cap_widths[5] = { 8, 16, 32, 64 };
 
 /* GObject vmethod implementations */
 
@@ -224,7 +222,7 @@ gst_delta_dsp_setup (GstAudioFilter * filter,
   delta_dsp = GST_DELTA_DSP (filter);
 
   /* if any setup needs to be done, do it here */
-	gboolean res = setup_delta_dsp_caps(filter);
+	gboolean res = setup_delta_dsp_caps(info, delta_dsp);
 	if (res == TRUE)		
   	set_delta_filter_function(delta_dsp);
 	
@@ -238,35 +236,17 @@ gst_delta_dsp_setup (GstAudioFilter * filter,
  * Set the filter caps
  */
 static gboolean
-setup_delta_dsp_caps(GstAudioFilter * filter)
+setup_delta_dsp_caps(GstAudioInfo * info, GstDeltaDsp* delta_dsp)
 {
-  GstDeltaDsp *delta_dsp;
-	GstBaseTransform *base_transform;
+	GstAudioFormatInfo *finfo = info->finfo;
 
-  delta_dsp = GST_DELTA_DSP (filter);
-	base_transform = (GstBaseTransform*) filter;
-	GstPad* src_pad = GST_BASE_TRANSFORM_SRC_PAD(base_transform);
-	GstCaps* caps = gst_pad_get_current_caps (src_pad);
-	if (caps == NULL)
+	if (finfo != NULL)
 	{
-		src_pad = GST_BASE_TRANSFORM_SINK_PAD(base_transform);
-		caps = gst_pad_get_current_caps (src_pad);
-	}
+		delta_dsp->sign = finfo->flags & GST_AUDIO_FORMAT_FLAG_SIGNED;
+    delta_dsp->width = finfo->width;
+		delta_dsp->channels = info->channels;
 
-	if (caps != NULL)
-	{
-		//gchar* tostr = gst_caps_to_string(caps);
-		//g_print("%s\n", tostr);
-
-    GstStructure *structure = gst_caps_get_structure (caps, 0);
-
-    const gchar* format = gst_structure_get_string (structure, "format");  
-
-		delta_dsp->sign = TRUE;
-
-		gint channels = 2;
-		gst_structure_get_int(structure, "channels", &channels);
-		delta_dsp->channels = channels;
+    const gchar* format = finfo->name;
 
 		if (format == NULL)
 			return FALSE;
@@ -284,16 +264,6 @@ setup_delta_dsp_caps(GstAudioFilter * filter)
 		else if (g_strrstr(format, be) != NULL)
 			delta_dsp->little_endian = FALSE;
 
-		int len = sizeof(allowed_cap_widths);
-		int i;
-		for (i = 0; i < len; i++) {
-			gchar* string_num = g_strdup_printf ("%d", allowed_cap_widths[i]);
-			gchar* width_str = g_strrstr(format, string_num);
-			if (width_str != NULL) {
-				delta_dsp->width = allowed_cap_widths[i];
-				break;
-			}
-		}
 		return TRUE;
 	}
 	return FALSE;
