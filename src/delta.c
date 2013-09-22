@@ -29,11 +29,10 @@ gint8 *process8 (void* buf, gint n_samples, gint nch, gfloat gain)
       prevSample[i] = (gdouble)samples[i];
 
   for (int i = nch; i < n_samples; i+=nch) {
-    
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble)samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (gint8) CLAMP(result, G_MININT8, G_MAXINT8);
     }
   }
@@ -47,13 +46,12 @@ guint8 *process8u (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = 0; i < nch; i++) 
       prevSample[i] = (gdouble)samples[i];
-
+	
   for (int i = nch; i < n_samples; i+=nch) {
-    
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble) samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (guint8) CLAMP(result, 0, G_MAXUINT8);
     }
   }
@@ -70,9 +68,9 @@ gint16 *process16 (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = nch; i < n_samples; i+=nch) {
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble)samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (gint16) CLAMP(result, G_MININT16, G_MAXINT16);
     }
   }
@@ -86,12 +84,12 @@ guint16 *process16u (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = 0; i < nch; i++) 
       prevSample[i] = (gdouble)samples[i];
-
+	
   for (int i = nch; i < n_samples; i+=nch) {
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble) samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (guint16) CLAMP(result, 0, G_MAXUINT16);
     }
   }
@@ -108,9 +106,9 @@ gint32 *process32 (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = nch; i < n_samples; i+=nch) {
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble)samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (gint32) CLAMP(result, G_MININT32, G_MAXINT32);
     }
   }
@@ -124,12 +122,12 @@ guint32 *process32u (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = 0; i < nch; i++) 
       prevSample[i] = (gdouble)samples[i];
-
+	
   for (int i = nch; i < n_samples; i+=nch) {
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble) samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (guint32) CLAMP(result, 0, G_MAXUINT32);
     }
   }
@@ -146,9 +144,9 @@ gint64 *process64 (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = nch; i < n_samples; i+=nch) {
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble)samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (gint64) CLAMP(result, G_MININT64, G_MAXINT64);
     }
   }
@@ -162,12 +160,12 @@ guint64 *process64u (void* buf, gint n_samples, gint nch, gfloat gain)
 
   for (int i = 0; i < nch; i++) 
       prevSample[i] = (gdouble)samples[i];
-
+	
   for (int i = nch; i < n_samples; i+=nch) {
     for (int j = 0; j < nch; j++) {
-			gdouble curr_sample = (gdouble)samples[i+j];
+      gdouble curr_sample = (gdouble) samples[i+j];
       gdouble result = curr_sample+(gain*(curr_sample-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (guint64) CLAMP(result, 0, G_MAXUINT64);
     }
   }
@@ -186,7 +184,7 @@ gfloat *processf (void* buf, gint n_samples, gint nch, gfloat gain)
     gfloat result;
     for (int j = 0; j < nch; j++) {
       result = samples[i+j]+(gain*(samples[i+j]-prevSample[j]));
-      prevSample[j] = samples[i+j];
+      prevSample[j] = (gdouble) samples[i+j];
       samples[i+j] = (gfloat) CLAMP(result, -G_MAXFLOAT, G_MAXFLOAT);
     }
   }
