@@ -335,7 +335,7 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
 
 static void set_delta_filter_function (GstDeltaDsp *filter) {
 
-  if (filter->is_int && filter->little_endian) {
+  if (filter->is_int) {
     if (filter->width == 8) {
       if (filter->sign)
         filter->process = (void*)process8;
@@ -358,7 +358,10 @@ static void set_delta_filter_function (GstDeltaDsp *filter) {
         filter->process = (void*)process64u;
     }
   } else {
-    filter->process = (void*)processf;
+		if (filter->width == 32)
+	    filter->process = (void*)processf;
+		else if (filter->width == 64)
+	    filter->process = (void*)processd;
   }
 }
 

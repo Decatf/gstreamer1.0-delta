@@ -78,7 +78,8 @@ struct _GstDeltaDsp
   gfloat gain;
   gboolean silent;
 
-  void (*process)(void*, gint, gint, gfloat);
+  //void (*process)(void*, gint, gint, gfloat);
+	void (*process) ();
 };
 
 struct _GstDeltaDspClass

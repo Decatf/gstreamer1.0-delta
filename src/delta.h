@@ -17,13 +17,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-gint8 *process8 (void* buf, gint size, gint nch, gfloat gain);
-guint8 *process8u (void* buf, gint size, gint nch, gfloat gain);
-gint16 *process16 (void* buf, gint size, gint nch, gfloat gain);
-guint16 *process16u (void* buf, gint size, gint nch, gfloat gain);
-gint32 *process32 (void* buf, gint size, gint nch, gfloat gain);
-guint32 *process32u (void* buf, gint size, gint nch, gfloat gain);
-gint64 *process64 (void* buf, gint size, gint nch, gfloat gain);
-guint64 *process64u (void* buf, gint size, gint nch, gfloat gain);
-gfloat *processf (void* buf, gint size, gint nch, gfloat gain);
+#define DLT_NEED_CLAMP(x, low, high)  (((x) > (high)) ? 1 : (((x) < (low)) ? 1 : 0))
+
+gint8 *process8 (void* buf, gint n_bytes, gint nch, gfloat gain);
+guint8 *process8u (void* buf, gint n_bytes, gint nch, gfloat gain);
+gint16 *process16 (void* buf, gint n_bytes, gint nch, gfloat gain);
+guint16 *process16u (void* buf, gint n_bytes, gint nch, gfloat gain);
+gint32 *process32 (void* buf, gint n_bytes, gint nch, gfloat gain);
+guint32 *process32u (void* buf, gint n_bytes, gint nch, gfloat gain);
+gint64 *process64 (void* buf, gint n_bytes, gint nch, gfloat gain);
+guint64 *process64u (void* buf, gint n_bytes, gint nch, gfloat gain);
+gfloat *processf (void* buf, gint n_bytes, gint nch, gfloat gain);
+gdouble *processd (void* buf, gint n_bytes, gint nch, gfloat gain);
 
