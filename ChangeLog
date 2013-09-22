@@ -1,7 +1,14 @@
+2013-09-21  Robert Yang  <decatf@gmail.com>
+
+	* Do buffer conversion before running delta computation. Add support for F64 audio format.
+	* Use std=c99 
+
+2013-09-20  Robert Yang  <decatf@gmail.com>
+
+	* Set up the the GstCaps info using GstAudioFormat.
+
 2013-09-19  Robert Yang  <decatf@gmail.com>
 
 	* Initial release:
 		Ported to GStreamer 1.0.		
-
-
 
