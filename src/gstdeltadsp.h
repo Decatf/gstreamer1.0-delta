@@ -75,6 +75,9 @@ struct _GstDeltaDsp
   gint width;
   //gint depth;
 
+	gint datatype_nbytes; // size of the data type (i.e. sizeof(float);)
+	gboolean negotiated;
+
   gfloat gain;
   gboolean silent;
 

@@ -98,7 +98,7 @@ static GstFlowReturn gst_delta_dsp_filter_inplace (GstBaseTransform * base_trans
     GstBuffer * buf);
 static gboolean
 		setup_delta_dsp_caps(GstAudioInfo * info, GstDeltaDsp* delta_dsp);
-static void 
+static gboolean 
 		set_delta_filter_function (GstDeltaDsp *filter);
 static void 
 		delta_dsp_tostring(GstDeltaDsp *filter);
@@ -167,6 +167,7 @@ gst_delta_dsp_init (GstDeltaDsp * filter)
   GST_DEBUG ("init");
 
   /* initialize default filter settings */
+	filter->negotiated = FALSE;
 	filter->gain = 1.00f;
 	filter->silent = TRUE;
 }
@@ -222,14 +223,25 @@ gst_delta_dsp_setup (GstAudioFilter * filter,
   delta_dsp = GST_DELTA_DSP (filter);
 
   /* if any setup needs to be done, do it here */
+	GST_OBJECT_LOCK(delta_dsp);
 	gboolean res = setup_delta_dsp_caps(info, delta_dsp);
-	if (res == TRUE)		
-  	set_delta_filter_function(delta_dsp);
-	
+	GST_OBJECT_UNLOCK(delta_dsp);
+	if (res == TRUE) {
+		GST_OBJECT_LOCK(delta_dsp);
+  	res = set_delta_filter_function(delta_dsp);
+		GST_OBJECT_UNLOCK(delta_dsp);
+	}
+	else {
+    GST_ELEMENT_ERROR (filter, CORE, NEGOTIATION,
+        ("Invalid incoming format"), (NULL));
+	}
+
 	if (delta_dsp->silent == FALSE)
 		delta_dsp_tostring(delta_dsp);	
 
-  return TRUE;                  /* it's all good */
+	delta_dsp->negotiated = res;
+
+  return delta_dsp->negotiated;
 }
 
 /*
@@ -243,8 +255,10 @@ setup_delta_dsp_caps(GstAudioInfo * info, GstDeltaDsp* delta_dsp)
 	if (finfo != NULL)
 	{
 		delta_dsp->sign = finfo->flags & GST_AUDIO_FORMAT_FLAG_SIGNED;
-    delta_dsp->width = finfo->width;
 		delta_dsp->channels = info->channels;
+
+    delta_dsp->width = finfo->width;
+		delta_dsp->datatype_nbytes = delta_dsp->width / 8;
 
     const gchar* format = finfo->name;
 
@@ -301,7 +315,10 @@ gst_delta_dsp_filter (GstBaseTransform * base_transform,
 
   /* Apply the filter function */
 	if (delta_dsp->process != NULL)
-		delta_dsp->process (dest_map_info.data, dest_map_info.size, delta_dsp->channels, delta_dsp->gain);
+		delta_dsp->process (dest_map_info.data, 
+				dest_map_info.size / delta_dsp->datatype_nbytes, 
+				delta_dsp->channels, 
+				delta_dsp->gain);
 
 	gst_buffer_unmap(inbuf, &src_map_info);
 	gst_buffer_unmap(outbuf, &dest_map_info);
@@ -316,6 +333,12 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
   GstDeltaDsp *delta_dsp;
   delta_dsp = GST_DELTA_DSP (base_transform);
 
+  if (G_UNLIKELY (!delta_dsp->negotiated)) {
+		GST_ELEMENT_ERROR (delta_dsp, CORE, NEGOTIATION,
+				("No format was negotiated"), (NULL));
+		return GST_FLOW_NOT_NEGOTIATED;
+  }
+
   /* Apply the filter function */
 	GstMapInfo map_info;
 	gboolean res = gst_buffer_map(buf, &map_info,  GST_MAP_READ | GST_MAP_WRITE);
@@ -325,7 +348,10 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
 	}
 
 	if (delta_dsp->process != NULL)
-		delta_dsp->process (map_info.data, map_info.size, delta_dsp->channels, delta_dsp->gain);
+		delta_dsp->process (map_info.data, 
+				map_info.size / delta_dsp->datatype_nbytes, 
+				delta_dsp->channels, 
+				delta_dsp->gain);
 
 	gst_buffer_unmap(buf, &map_info);
 
@@ -333,7 +359,9 @@ gst_delta_dsp_filter_inplace (GstBaseTransform * base_transform,
 }
 
 
-static void set_delta_filter_function (GstDeltaDsp *filter) {
+static gboolean set_delta_filter_function (GstDeltaDsp *filter) {
+
+	filter->process = NULL;
 
   if (filter->is_int) {
     if (filter->width == 8) {
@@ -363,6 +391,8 @@ static void set_delta_filter_function (GstDeltaDsp *filter) {
 		else if (filter->width == 64)
 	    filter->process = (void*)processd;
   }
+
+	return filter->process != NULL;
 }
 
 static void 
@@ -376,6 +406,7 @@ delta_dsp_tostring(GstDeltaDsp *filter)
 	g_print("little_endian %s\n", filter->little_endian ? "LE" : "BE");
 	g_print("signed: %s\n", filter->sign ? "signed" : "unsigned");
 	g_print("width %d\n", filter->width);
+	g_print("datatype_nbytes %d\n", filter->datatype_nbytes);
 	g_print("--------\n");
 	g_print("gain %f\n", filter->gain);
 	g_print("silent %d\n", filter->silent);
